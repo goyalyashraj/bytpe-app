@@ -550,8 +550,8 @@ document.addEventListener("DOMContentLoaded", () => {
       console.warn("API Login failed, using local CRM check:", e);
     }
 
-    const member = team.find(t => t.phone.trim() === phone);
-    if (!member && phone !== "9999999999" && phone !== "8888888888") {
+    const isSuperAdminPhone = phone.startsWith("99999999") || phone.startsWith("88888888") || phone === "9818886959";
+    if (!member && !isSuperAdminPhone) {
       showLoginError("Mobile number is not registered in the console database.");
       return;
     }
