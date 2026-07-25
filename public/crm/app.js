@@ -2435,15 +2435,27 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!products.std[category].includes(name)) {
         products.std[category].push(name);
       }
+      filterCatalogType.value = "std";
     } else {
       if (!products.uni[category]) products.uni[category] = [];
       if (!products.uni[category].includes(name)) {
         products.uni[category].push(name);
       }
+      filterCatalogType.value = "uni";
     }
 
     if (price > 0) {
       products.prices[name] = price;
+    }
+
+    // Also sync to Spring Boot API if available
+    if (typeof ApiClient !== "undefined" && ApiClient.addProduct) {
+      ApiClient.addProduct({
+        name: name,
+        category: category,
+        price: price,
+        storeType: type
+      }).catch(e => console.warn("API addProduct sync warning:", e));
     }
 
     saveProducts();
