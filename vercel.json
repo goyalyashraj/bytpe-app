@@ -1,0 +1,28 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "bytepe-emfin-mvp-console.vercel.app"
+        }
+      ],
+      "destination": "https://bytepe-embedded-finance-mvp.vercel.app/crm/index.html",
+      "permanent": false
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "bytepe-emfin-mvp-onboard.vercel.app"
+        }
+      ],
+      "destination": "https://bytepe-embedded-finance-mvp.vercel.app/Onboarding%20Flow/index.html",
+      "permanent": false
+    }
+  ]
+}
