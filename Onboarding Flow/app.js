@@ -180,7 +180,9 @@ function setupEventListeners() {
     
     if (teamList.length === 0) {
       teamList = [
-        { id: "BP100", name: "Amit Kumar", email: "amit.kumar@bytepe.in", phone: "9811002233", role: "BDE", status: "Active" }
+        { id: "BP100", name: "Amit Kumar", email: "amit.kumar@bytepe.in", phone: "9811002233", role: "BDE", status: "Active" },
+        { id: "EMP001", name: "Sales Executive", email: "sales@bytepe.in", phone: "8888888888", role: "BDE", status: "Active" },
+        { id: "ADMIN001", name: "Admin Ops", email: "admin@bytepe.in", phone: "9999999999", role: "Admin", status: "Active" }
       ];
     }
     
