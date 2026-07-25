@@ -22,17 +22,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
-        
-        List<String> origins = Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .toList();
-
-        if (origins.contains("*") || allowedOrigins.equals("*")) {
-            config.setAllowedOriginPatterns(List.of("*"));
-        } else {
-            config.setAllowedOrigins(origins);
-        }
+        config.setAllowedOriginPatterns(List.of("*"));
 
         config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
