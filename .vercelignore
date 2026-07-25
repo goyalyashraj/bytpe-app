@@ -1,0 +1,5 @@
+# Ignore Java backend files during Vercel frontend deployments
+backend/
+pom.xml
+target/
+*.jar
