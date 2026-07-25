@@ -5,7 +5,6 @@
     "rootDir": "backend"
   },
   "deploy": {
-    "startCommand": "java -Dserver.port=$PORT -jar target/bytepe-backend-1.0.0.jar",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE"
