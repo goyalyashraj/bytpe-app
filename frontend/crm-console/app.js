@@ -541,9 +541,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("bytepe_ops_logged_in", "true");
         localStorage.setItem("bytepe_ops_logged_in_user_phone", phone);
         loginError.style.display = "none";
-        loginOverlay.style.display = "none";
-        crmMainContainer.style.display = "block";
-        renderAll();
+        checkAuth();
         return;
       }
     } catch(e) {
