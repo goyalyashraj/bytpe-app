@@ -526,28 +526,37 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+
     try {
       const res = await fetch((window.BYTEPE_API_URL || "https://bytpe-app-production.up.railway.app/api") + "/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phone, password: otp || "admin123" })
+        body: JSON.stringify({ phone: phone, password: otp || "admin123" }),
+        signal: controller.signal
       });
-      const data = await res.json();
-
-      if (res.ok && data.token) {
-        localStorage.setItem("bytepe_jwt", data.token);
-        localStorage.setItem("bytepe_ops_logged_in", "true");
-        localStorage.setItem("bytepe_ops_logged_in_user_phone", phone);
-        loginError.style.display = "none";
-        checkAuth();
-        return;
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await res.json();
+          if (data.token) {
+            localStorage.setItem("bytepe_jwt", data.token);
+            localStorage.setItem("bytepe_ops_logged_in", "true");
+            localStorage.setItem("bytepe_ops_logged_in_user_phone", phone);
+            loginError.style.display = "none";
+            checkAuth();
+            return;
+          }
+        }
       }
     } catch(e) {
-      console.warn("API Login failed, using local CRM check:", e);
+      console.warn("API Login network timeout/fallback:", e.message);
     }
 
     const isSuperAdminPhone = phone.startsWith("99999999") || phone.startsWith("88888888") || phone === "9818886959";
-    if (!member && !isSuperAdminPhone) {
+    if (!isSuperAdminPhone) {
       showLoginError("Mobile number is not registered in the console database.");
       return;
     }
