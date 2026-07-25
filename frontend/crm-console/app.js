@@ -623,6 +623,22 @@ document.addEventListener("DOMContentLoaded", () => {
         if (Array.isArray(liveSales)) sales = liveSales;
         const liveTeam = await ApiClient.getTeam();
         if (Array.isArray(liveTeam)) team = liveTeam;
+        const liveProducts = await ApiClient.getProducts();
+        if (Array.isArray(liveProducts) && liveProducts.length > 0) {
+          liveProducts.forEach(item => {
+            const storeType = item.storeType || "std";
+            const cat = item.category || "General";
+            const name = item.name;
+            if (storeType === "std") {
+              if (!products.std[cat]) products.std[cat] = [];
+              if (!products.std[cat].includes(name)) products.std[cat].push(name);
+            } else {
+              if (!products.uni[cat]) products.uni[cat] = [];
+              if (!products.uni[cat].includes(name)) products.uni[cat].push(name);
+            }
+            if (item.price) products.prices[name] = item.price;
+          });
+        }
       }
     } catch(e) {
       console.warn("Live API data fetch error:", e.message);
