@@ -6,21 +6,19 @@
   <title>BytePé · In-Store Assisted Lending (Retailer Sales App)</title>
 
   <!-- Shared REST API Client Bridge -->
-  <script src="../shared/api-sync.js?v=1"></script>
+  <script src="../shared/api-sync.js"></script>
   
-  <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@18.2.0",
-        "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
-        "react-dom": "https://esm.sh/react-dom@18.2.0",
-        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client"
-      }
-    }
-  </script>
-  <script type="module" crossorigin src="/assets/index-EMAY5QTo.js"></script>
+  <!-- React 18 CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  
+  <!-- Babel Standalone JSX Compiler -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body style="margin: 0; background: #F4F5F7;">
   <div id="root"></div>
+
+  <!-- Load BytePe React Application -->
+  <script type="text/babel" src="BytePe flex app.jsx"></script>
 </body>
 </html>
