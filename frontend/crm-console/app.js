@@ -600,34 +600,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Data Loading & Seeding
-  function loadData() {
-    partners = JSON.parse(localStorage.getItem("bytepe_partners") || "[]");
-    sales = JSON.parse(localStorage.getItem("bytepe_sales") || "[]");
-    
-    let parsedTeam = [];
+  async function loadData() {
     try {
-      const storedTeam = localStorage.getItem("bytepe_team");
-      if (storedTeam) parsedTeam = JSON.parse(storedTeam);
-    } catch(e) {}
-
-    if (!parsedTeam.some(t => t.phone === "9818886959")) {
-      parsedTeam.push({
-        id: "BP103",
-        name: "Rohit Agarwal",
-        email: "rohit@bytepe.com",
-        phone: "9818886959",
-        role: "Admin",
-        status: "Active",
-        location: "Noida",
-        manager: "Jayant Jha",
-        remarks: "Seed administrator."
-      });
-      localStorage.setItem("bytepe_team", JSON.stringify(parsedTeam));
-      if (typeof SupabaseReplication !== "undefined") {
-        SupabaseReplication.pushTeamMember(parsedTeam[parsedTeam.length - 1]);
+      if (typeof ApiClient !== "undefined") {
+        const livePartners = await ApiClient.getPartners();
+        if (Array.isArray(livePartners)) partners = livePartners;
+        const liveSales = await ApiClient.getSales();
+        if (Array.isArray(liveSales)) sales = liveSales;
+        const liveTeam = await ApiClient.getTeam();
+        if (Array.isArray(liveTeam)) team = liveTeam;
       }
+    } catch(e) {
+      console.warn("Live API data fetch error:", e.message);
     }
-    team = parsedTeam;
+    renderAll();
 
     // Ensure partners have bdeId, bdeName, and geolocation values
     let modifiedPartners = false;
