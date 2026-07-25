@@ -28,35 +28,38 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String phone;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
+        final String jwt = authHeader.substring(7);
 
-        if (jwtUtil.isTokenValid(jwt)) {
-            phone = jwtUtil.extractPhone(jwt);
-            String role = jwtUtil.extractRole(jwt);
-            String partnerId = jwtUtil.extractPartnerId(jwt);
-            String userId = jwtUtil.extractUserId(jwt);
+        try {
+            if (jwtUtil.isTokenValid(jwt)) {
+                String phone = jwtUtil.extractPhone(jwt);
+                String role = jwtUtil.extractRole(jwt);
+                String partnerId = jwtUtil.extractPartnerId(jwt);
+                String userId = jwtUtil.extractUserId(jwt);
 
-            if (phone != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        phone,
-                        null,
-                        Collections.singletonList(authority)
-                );
-                
-                CustomUserDetails details = new CustomUserDetails(userId, phone, role, partnerId);
-                authToken.setDetails(details);
+                if (phone != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            phone,
+                            null,
+                            Collections.singletonList(authority)
+                    );
+                    
+                    CustomUserDetails details = new CustomUserDetails(userId, phone, role, partnerId);
+                    authToken.setDetails(details);
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            // Invalid or expired token: clear security context gracefully
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
