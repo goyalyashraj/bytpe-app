@@ -288,7 +288,7 @@ function LoginScreen({ onLogin }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch((window.BYTEPE_API_URL || "https://bytepe-api.up.railway.app/api") + "/auth/login", {
+      const res = await fetch((window.BYTEPE_API_URL || "https://bytpe-app-production.up.railway.app/api") + "/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: mobile.trim(), password: "123456" })
@@ -319,7 +319,7 @@ function LoginScreen({ onLogin }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch((window.BYTEPE_API_URL || "https://bytepe-api.up.railway.app/api") + "/auth/login", {
+      const res = await fetch((window.BYTEPE_API_URL || "https://bytpe-app-production.up.railway.app/api") + "/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: mobile.trim(), password: otp })
