@@ -600,7 +600,16 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       if (typeof ApiClient !== "undefined") {
         const livePartners = await ApiClient.getPartners();
-        if (Array.isArray(livePartners)) partners = livePartners;
+        if (Array.isArray(livePartners)) {
+          partners = livePartners.map(p => ({
+            ...p,
+            regId: p.regId || p.id || "P-100",
+            shopName: p.shopName || p.shop_name || "Store",
+            ownerName: p.ownerName || p.owner_name || "Owner",
+            phone: p.phone || "",
+            status: p.status || "Pending"
+          }));
+        }
         const liveSales = await ApiClient.getSales();
         if (Array.isArray(liveSales)) sales = liveSales;
         const liveTeam = await ApiClient.getTeam();
