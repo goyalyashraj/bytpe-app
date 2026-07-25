@@ -466,9 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const isLoggedIn = localStorage.getItem("bytepe_ops_logged_in");
     if (isLoggedIn !== "true") return;
 
-    const phone = localStorage.getItem("bytepe_ops_logged_in_user_phone");
-    const currentUser = team.find(t => t.phone.trim() === (phone || "").trim()) || team[0];
-    if (!currentUser) return;
+    const currentUser = (team && team.length > 0) ? (team.find(t => t.phone && t.phone.trim() === (phone || "").trim()) || team[0]) : { id: "ADMIN-01", name: "Super Admin", role: "ADMIN", phone: phone || "9999999991" };
 
     const initials = currentUser.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
 
