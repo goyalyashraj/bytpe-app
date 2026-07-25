@@ -4,21 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BytePé · In-Store Assisted Lending (Retailer Sales App)</title>
-
-  <!-- Shared REST API Client Bridge -->
+  <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+        "react-dom": "https://esm.sh/react-dom@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client"
+      }
+    }
+  </script>
   <script src="../shared/api-sync.js"></script>
-  
-  <!-- React 18 & ReactDOM UMD CDN -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  
-  <!-- Babel Standalone JSX Compiler -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body style="margin: 0; background: #F4F5F7;">
   <div id="root"></div>
-
-  <!-- Load and render BytePe React Sales Application -->
-  <script type="text/babel" data-presets="react" src="app-bundle.js"></script>
+<script type="module">
+  import React from "react";
+  import { createRoot } from "react-dom/client";
+  import App from "./app.esm.js";
+  const root = createRoot(document.getElementById('root'));
+  root.render(React.createElement(App));
+</script>
 </body>
 </html>
