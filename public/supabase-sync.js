@@ -1,5 +1,5 @@
 // BytePé Spring Boot API Bridge — Drop-in Replacement for Supabase Sync
-const API_BASE_URL = window.BYTEPE_API_URL || "https://bytepe-api.up.railway.app/api";
+const API_BASE_URL = window.BYTEPE_API_URL || "https://bytpe-app-production.up.railway.app/api";
 
 const SupabaseClient = {
   getHeaders() {
@@ -55,18 +55,9 @@ const SupabaseClient = {
 };
 
 const SupabaseMappers = {
-  team: {
-    sqlToJs: (row) => row,
-    jsToSql: (m) => m
-  },
-  retailer: {
-    sqlToJs: (row) => row,
-    jsToSql: (r) => r
-  },
-  ledger: {
-    sqlToJs: (row) => row,
-    jsToSql: (l) => l
-  }
+  team: { sqlToJs: (row) => row, jsToSql: (m) => m },
+  retailer: { sqlToJs: (row) => row, jsToSql: (r) => r },
+  ledger: { sqlToJs: (row) => row, jsToSql: (l) => l }
 };
 
 const SupabaseReplication = {
@@ -82,32 +73,14 @@ const SupabaseReplication = {
   },
 
   async pushRetailer(retailer) {
-    await SupabaseClient.upsert("partners/register", {
-      shopName: retailer.shopName || retailer.shop_name,
-      ownerName: retailer.ownerName || retailer.owner_name,
-      phone: retailer.phone,
-      email: retailer.email,
-      category: retailer.category,
-      city: retailer.city
-    });
+    await SupabaseClient.upsert("partners", retailer);
   },
 
   async pushSale(sale) {
-    await SupabaseClient.upsert("sales", {
-      customerName: sale.customer || sale.customerName,
-      customerMobile: sale.customerMobile || sale.phone || "",
-      product: sale.product,
-      category: sale.category || "",
-      amount: sale.amount,
-      emi: sale.emi,
-      tenure: sale.tenure,
-      lender: sale.lender,
-      appleCare: sale.ac || sale.appleCare || ""
-    });
+    await SupabaseClient.upsert("sales", sale);
   }
 };
 
-// Expose globally to maintain 100% compatibility with all existing HTML/JS files
 window.SupabaseClient = SupabaseClient;
 window.SupabaseMappers = SupabaseMappers;
 window.SupabaseReplication = SupabaseReplication;

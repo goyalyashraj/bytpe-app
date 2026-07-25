@@ -1,101 +1,191 @@
-// BytePé Spring Boot REST API Synchronization Helper
-// Replaces Supabase with Railway Spring Boot + MySQL Backend
+// BytePé Spring Boot REST API Client & Synchronization Bridge
+const API_BASE_URL = window.BYTEPE_API_URL || "https://bytpe-app-production.up.railway.app/api";
 
-const API_BASE_URL = window.BYTEPE_API_URL || "https://bytepe-api.up.railway.app/api";
-
-const ApiClient = {
-  getHeaders() {
+class ApiClient {
+  static getHeaders() {
     const token = localStorage.getItem("bytepe_jwt");
-    const headers = {
-      "Content-Type": "application/json"
-    };
+    const headers = { "Content-Type": "application/json" };
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
     return headers;
-  },
+  }
 
+  static async request(endpoint, options = {}) {
+    const url = `${API_BASE_URL}${endpoint}`;
+    const headers = this.getHeaders();
+    const config = {
+      ...options,
+      headers: {
+        ...headers,
+        ...options.headers
+      }
+    };
+
+    try {
+      const response = await fetch(url, config);
+      if (response.status === 401) {
+        console.warn("JWT Token expired or invalid. Clearing session.");
+        localStorage.removeItem("bytepe_jwt");
+      }
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `HTTP ${response.status}`);
+      }
+      return await response.json();
+    } catch (err) {
+      console.error(`API Error [${endpoint}]:`, err.message);
+      throw err;
+    }
+  }
+
+  // Auth Endpoints
+  static async login(phone, password = "123456") {
+    const res = await this.request("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ phone, password })
+    });
+    if (res && res.token) {
+      localStorage.setItem("bytepe_jwt", res.token);
+    }
+    return res;
+  }
+
+  // Partner Endpoints
+  static async getPartners() {
+    return await this.request("/partners");
+  }
+
+  static async getPartnerById(id) {
+    return await this.request(`/partners/${id}`);
+  }
+
+  static async registerPartner(partnerData) {
+    return await this.request("/partners/register", {
+      method: "POST",
+      body: JSON.stringify(partnerData)
+    });
+  }
+
+  static async updatePartnerStatus(id, status, assignedSalesmanId) {
+    return await this.request(`/partners/${id}/status?status=${encodeURIComponent(status)}${assignedSalesmanId ? `&assignedSalesmanId=${assignedSalesmanId}` : ""}`, {
+      method: "PUT"
+    });
+  }
+
+  // Sales Endpoints
+  static async getSales() {
+    return await this.request("/sales");
+  }
+
+  static async getSalesByPartner(partnerId) {
+    return await this.request(`/sales/partner/${partnerId}`);
+  }
+
+  static async createSale(saleData) {
+    return await this.request("/sales", {
+      method: "POST",
+      body: JSON.stringify(saleData)
+    });
+  }
+
+  // Team Endpoints
+  static async getTeam() {
+    return await this.request("/team");
+  }
+
+  static async addTeamMember(memberData) {
+    return await this.request("/team", {
+      method: "POST",
+      body: JSON.stringify(memberData)
+    });
+  }
+
+  static async deleteTeamMember(id) {
+    return await this.request(`/team/${id}`, {
+      method: "DELETE"
+    });
+  }
+
+  // Products Endpoints
+  static async getProducts() {
+    return await this.request("/products");
+  }
+
+  static async addProduct(productData) {
+    return await this.request("/products", {
+      method: "POST",
+      body: JSON.stringify(productData)
+    });
+  }
+}
+
+// Global Supabase-compatible drop-in wrapper
+const SupabaseClient = {
   async get(table) {
     try {
-      const endpoint = table === "onboarding_retailers" ? "partners" : table;
-      const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
-        method: "GET",
-        headers: this.getHeaders()
-      });
-      if (!res.ok) throw new Error(await res.text());
-      return await res.json();
+      if (table === "onboarding_retailers" || table === "partners") {
+        return await ApiClient.getPartners();
+      } else if (table === "sales_ledger" || table === "sales") {
+        return await ApiClient.getSales();
+      } else if (table === "team_members" || table === "team") {
+        return await ApiClient.getTeam();
+      } else if (table === "products") {
+        return await ApiClient.getProducts();
+      }
+      return [];
     } catch (e) {
-      console.warn(`API GET ${table} failed (using local fallback):`, e.message);
-      return null;
+      console.warn(`Fallback for table ${table}:`, e.message);
+      return JSON.parse(localStorage.getItem(`bytepe_${table}`) || "[]");
     }
   },
 
   async upsert(table, data) {
     try {
-      const endpoint = table === "onboarding_retailers" ? "partners/register" : table;
-      const method = "POST";
-      const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
-        method: method,
-        headers: this.getHeaders(),
-        body: JSON.stringify(data)
-      });
-      if (!res.ok) throw new Error(await res.text());
-      return await res.json();
+      if (table === "onboarding_retailers" || table === "partners") {
+        return await ApiClient.registerPartner(data);
+      } else if (table === "sales_ledger" || table === "sales") {
+        return await ApiClient.createSale(data);
+      } else if (table === "team_members" || table === "team") {
+        return await ApiClient.addTeamMember(data);
+      } else if (table === "products") {
+        return await ApiClient.addProduct(data);
+      }
     } catch (e) {
-      console.warn(`API UPSERT ${table} failed (using local fallback):`, e.message);
-      return null;
+      console.warn(`Upsert fallback for table ${table}:`, e.message);
     }
   },
 
   async delete(table, id) {
-    try {
-      const res = await fetch(`${API_BASE_URL}/${table}/${id}`, {
-        method: "DELETE",
-        headers: this.getHeaders()
-      });
-      if (!res.ok) throw new Error(await res.text());
-      return true;
-    } catch (e) {
-      console.error(`API DELETE ${table} failed:`, e.message);
-      return false;
+    if (table === "team_members" || table === "team") {
+      return await ApiClient.deleteTeamMember(id);
     }
+    return false;
   }
 };
-
-// Aliases for seamless drop-in compatibility with existing codebase
-const SupabaseClient = ApiClient;
 
 const SupabaseReplication = {
   async pullAll() {
-    // Background sync helper
+    try {
+      const partners = await SupabaseClient.get("partners");
+      if (partners) localStorage.setItem("bytepe_partners", JSON.stringify(partners));
+      const sales = await SupabaseClient.get("sales");
+      if (sales) localStorage.setItem("bytepe_transactions", JSON.stringify(sales));
+    } catch (e) {
+      console.warn("Pull background replication error:", e);
+    }
   },
 
   async pushRetailer(retailer) {
-    await ApiClient.upsert("partners/register", {
-      shopName: retailer.shopName || retailer.shop_name,
-      ownerName: retailer.ownerName || retailer.owner_name,
-      phone: retailer.phone,
-      email: retailer.email,
-      category: retailer.category,
-      city: retailer.city
-    });
+    return await SupabaseClient.upsert("partners", retailer);
   },
 
   async pushSale(sale) {
-    await ApiClient.upsert("sales", {
-      customerName: sale.customer || sale.customerName,
-      customerMobile: sale.customerMobile || sale.phone || "",
-      product: sale.product,
-      category: sale.category || "",
-      amount: sale.amount,
-      emi: sale.emi,
-      tenure: sale.tenure,
-      lender: sale.lender,
-      appleCare: sale.ac || sale.appleCare || ""
-    });
+    return await SupabaseClient.upsert("sales", sale);
   }
 };
 
+// Expose globally for complete drop-in compatibility
 window.ApiClient = ApiClient;
 window.SupabaseClient = SupabaseClient;
 window.SupabaseReplication = SupabaseReplication;
