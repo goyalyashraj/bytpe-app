@@ -24,4 +24,16 @@ public class ProductController {
         }
         return ResponseEntity.ok(productRepository.findByIsActiveTrue());
     }
+
+    @PostMapping
+    public ResponseEntity<Product> addProduct(@RequestBody Product product) {
+        if (product.getId() == null || product.getId().isBlank()) {
+            product.setId("PROD-" + System.currentTimeMillis());
+        }
+        if (product.getIsActive() == null) {
+            product.setIsActive(true);
+        }
+        Product saved = productRepository.save(product);
+        return ResponseEntity.ok(saved);
+    }
 }
